@@ -1,3 +1,4 @@
 **/.vscode
 **/data
 **/.venv
+**/model_dir
