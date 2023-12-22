@@ -1,7 +1,15 @@
 from typing import List
 
 import torch
-from torch.nn import LazyLinear, Dropout, ReLU, Sequential, LayerNorm
+from torch.nn import (
+    LazyLinear,
+    Dropout,
+    ReLU,
+    Sequential,
+    LayerNorm,
+    MSELoss,
+)
+from torch.nn import functional as F
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 torch.manual_seed(29)
@@ -13,7 +21,6 @@ class SimpleBlock(torch.nn.Module):
 
         self.net = Sequential(
             LazyLinear(num_output, device=device),
-            LayerNorm(num_output, device=device),
             ReLU(),
             Dropout(dropout),
         )
@@ -32,17 +39,17 @@ class Block(torch.nn.Module):
     ) -> None:
         super().__init__()
 
-        self.layers = [
-            SimpleBlock(no, d, device) for no, d in zip(num_output_list, dropout_list)
-        ]
+        self.hidden_net = Sequential(
+            *[
+                SimpleBlock(no, d, device)
+                for no, d in zip(num_output_list, dropout_list)
+            ]
+        )
 
         self.layer_out = LazyLinear(num_output, device=device)
 
     def __call__(self, X):
-        for layer in self.layers:
-            output = layer(X)
-
-        return self.layer_out(output)
+        return self.layer_out(self.hidden_net(X))
 
 
 class MLP(torch.nn.Module):
@@ -52,14 +59,13 @@ class MLP(torch.nn.Module):
         num_output_list: List[int],
         dropout_list: List[int],
         block_io_shape: int = 64,
-        outputs: int = 2,
         device: str = "cuda",
     ):
         super().__init__()
 
         self.layer_in = LazyLinear(block_io_shape, device=device)
 
-        self.layers = [
+        self.block_list = [
             Block(
                 num_output_list=num_output_list,
                 dropout_list=dropout_list,
@@ -67,12 +73,10 @@ class MLP(torch.nn.Module):
             )
             for _ in range(n)
         ]
-
-        self.output_layer = LazyLinear(outputs, device=device)
-
+        self.norm_list = [LayerNorm(block_io_shape, device=device) for _ in range(n)]
+        self.output_layer = LazyLinear(1, device=device)
+        self.loss_func = MSELoss()
         self.apply(self._init)
-
-        self.mse_loss = torch.nn.MSELoss()
 
     def _init(self, module):
         if type(module) is torch.nn.Linear:
@@ -82,10 +86,44 @@ class MLP(torch.nn.Module):
     def __call__(self, X):
         output = self.layer_in(X)
 
-        for l in self.layers:
-            output = l(output) + output
+        for layer, norm in zip(self.block_list, self.norm_list):
+            output = F.relu(norm(layer(output) + output))
 
         return self.output_layer(output)
 
-    def loss(self, y, pred):
-        return self.mse_loss(y, pred)
+    def loss(self, y, preds):
+        raise NotImplementedError
+
+
+class MLP_Diameter(MLP):
+    def loss(self, y, preds):
+        base_loss = self.loss_func(preds, y)
+        
+        e = torch.tensor(1e8, device=device)**preds
+
+        # Penalize values less than 0.0
+        denominator = torch.min(
+            torch.min(e),
+            torch.tensor(1.0, device=device),
+        )
+
+        return base_loss / denominator
+
+
+class MLP_Albedo(MLP):
+    def loss(self, y, preds):
+        base_loss = self.loss_func(preds, y)
+
+        eb = torch.tensor(1e8, device=device)
+        e = eb**preds
+
+        # Penalize values greater than 1.0
+        numerator = torch.max(torch.max(e), eb) / eb
+
+        # Penalize values less than 0.0
+        denominator = torch.min(
+            torch.min(e),
+            torch.tensor(1.0, device=device),
+        )
+
+        return (base_loss * numerator) / denominator

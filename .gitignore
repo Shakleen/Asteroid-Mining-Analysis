@@ -2,3 +2,4 @@
 **/data
 **/.venv
 **/model_dir
+**/__pycache__

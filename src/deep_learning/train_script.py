@@ -1,11 +1,7 @@
-import pickle
 import os
 
 import torch
 from torch.optim import AdamW, lr_scheduler
-from tqdm import tqdm
-
-from .mlp import MLP
 
 torch.manual_seed(29)
 
@@ -14,10 +10,7 @@ def train(model, optimizer, scaler, train_loader, device):
     train_loss = 0
     model.train()
 
-    for _, (X, y) in zip(
-        tqdm(range(len(train_loader)), desc="Training batch"),
-        train_loader,
-    ):
+    for X, y in train_loader:
         X = X.to(device)
         y = y.to(device)
 
@@ -34,15 +27,11 @@ def train(model, optimizer, scaler, train_loader, device):
     return train_loss
 
 
-def validate(model, data_loader, desc, device):
+def validate(model, data_loader, device):
     model.eval()
     valid_loss = 0
 
-    for _, batch in zip(
-        tqdm(range(len(data_loader)), desc=desc),
-        data_loader,
-    ):
-        X, y = batch
+    for X, y in data_loader:
         X = X.to(device)
         y = y.to(device)
 
@@ -56,47 +45,51 @@ def validate(model, data_loader, desc, device):
 
 def train_epoch(
     model,
+    device,
     num_epochs,
     learning_rate,
+    gamma,
     patience,
     root_save_dir,
     model_name,
     train_loader,
     valid_loader,
 ):
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model = MLP(
-        3,
-        num_output_list=[256, 128, 64],
-        dropout_list=[0.2, 0.15, 0.1],
-        device=device,
-    )
     optimizer = AdamW(model.parameters(), lr=learning_rate)
     scheduler = lr_scheduler.ExponentialLR(
         optimizer,
-        gamma=0.9,
+        gamma=gamma,
         last_epoch=-1,
         verbose=False,
     )
+    model_save_file = os.path.join(root_save_dir, model_name)
+    scaler = torch.cuda.amp.GradScaler()
+    min_eval_loss = float("inf")
+    early_stopping_hook = 0
+    log_file_path = os.path.join(root_save_dir, "log.txt")
+
+    if os.path.exists(log_file_path):
+        os.remove(log_file_path)
 
     for epoch in range(num_epochs):
-        train_loss = train()
-        valid_loss = validate(valid_loader, "Validating batch")
+        train_loss = train(model, optimizer, scaler, train_loader, device)
+        valid_loss = validate(model, valid_loader, device)
 
+        log_file = open(log_file_path, "a")
         print(
             "Epoch: {} - Training loss: {} - Eval Loss: {} - LR: {}".format(
                 epoch + 1,
                 train_loss / len(train_loader),
                 valid_loss / len(valid_loader),
                 optimizer.param_groups[0]["lr"],
-            )
+            ),
+            file=log_file,
         )
         scheduler.step()
 
         if valid_loss < min_eval_loss:
-            model_save_file = os.path.join(root_save_dir, model_name)
             torch.save(model.state_dict(), model_save_file)
-            print(f"Saved model to {model_save_file}")
+            print(f"Saved model to {model_save_file}", file=log_file)
             min_eval_loss = valid_loss
             early_stopping_hook = 0
         else:
@@ -105,4 +98,7 @@ def train_epoch(
             if early_stopping_hook > patience:
                 break
 
+        log_file.close()
+
     print("The training process has done!")
+    return model
