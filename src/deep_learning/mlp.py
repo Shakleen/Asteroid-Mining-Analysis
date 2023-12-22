@@ -98,8 +98,8 @@ class MLP(torch.nn.Module):
 class MLP_Diameter(MLP):
     def loss(self, y, preds):
         base_loss = self.loss_func(preds, y)
-        
-        e = torch.tensor(1e8, device=device)**preds
+
+        e = torch.tensor(1e8, device=device) ** preds
 
         # Penalize values less than 0.0
         denominator = torch.min(
