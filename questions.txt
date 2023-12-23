@@ -1,0 +1,45 @@
+1. The size of an asteroid is a major factor in determining how valuable it is. 
+
+    * There are 4 types of near earth asteroids. Amongst them which has, on average, larger asteroids?
+
+    * There are different belts of asteroids. The outer belt, the middle belt, and others. Which belt is more valuable in terms of asteroid size?
+
+2. Another factor for considering which asteroids to mine is the presence of valuable materials. Albedo value can be used to infer what materials an asteroid is composed of. Asteroids are mostly carbonaceous or metallic.
+
+    * In this case, which NEO type is the most valuable?
+
+    * Which NEO type has the highest proportion of metallic asteroids?
+
+    * Amongst different asteroid belts, which is the most valuable?
+
+    * Which asteroid belt has the highest proportion of metallic asteroids?
+
+    * If we consider both NEO type and composition type, which combination has, on average, larger asteroids?
+
+    * Metallic asteroids should have an albedo of 0.2. 
+            
+        * Which NEO asteroid type has a lower variance from this value?
+
+        * Which asteroid belt has a lower variance from this value?
+
+3. In the priliminary stages of mining, we will probably not have the technology or fuel required to transfer asteroids close to earth for efficient mining and transportation. In that case, we are dependent on the period of an asteroid. An asteroid with a lower period will be mined more frequently. 
+
+    * Considering this, what NEO type has, on average, lower periods?
+
+    * If we consider both NEO type and composition type, which combination has, on average, lower periods?
+
+4. Another important aspect to consider is the MOID value of an asteroid. Typically, lower MOID valued asteroids will come closer to earth, being more feasible to mine.
+
+    * Which NEO type has on average a lower moid?
+
+    * If we consider both NEO type and composition type, which combination has, on average, lower moid?
+
+5. Orbital stability is a major thing to consider when trying to look for asteroids. The less certain we are about an asteroid's orbit, the more dangerous the mining operation becomes. Considering this, 
+
+    * What is the relative proportion of metallic to carbonaceous asteroids for each orbital condition code? Which has the highest proportion of metallic asteroids?
+
+    * Considering both condition code and composition types, which combination has, on average, larger asteroids?
+
+    * Considering both condition code and composition types, which combination has, on average, lower periods?
+
+    * Considering both condition code and composition types, which combination has, on average, lower moid?
