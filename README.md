@@ -28,6 +28,28 @@ P.S. This is no solo mission! Don't forget to star this repository and join the 
 
 ***
 
+## Feasibility Findings
+
+### In a nutshell
+
+### Size
+
+1. Looking at asteroid size (measured by diameter), **Apollo** asteroids are generally bigger than other NEO types. Bigger asteroids have more materials to mine, and **Apollo** asteroids come closer to Earth than others. So, it's logical to begin with **Apollo** for mining operations.
+
+2. In the future, when we have the right technology for space exploration, our focus should be on the **main asteroid belt (MBA)** instead of the **outer asteroid belt (OAB)**. This is because asteroids in the **MBA** are larger than those in the **OAB**.
+
+### Composition
+
+1. NEOs generally have a smaller percentage of metallic asteroids compared to those farther away. However, within NEOs, the **Apollo** asteroids stand out with the highest proportion of metallic asteroids. This makes them an excellent starting point for mining efforts.
+
+2. In the future, our focus for mining should be on the **main belt asteroids**. They have the highest percentage of metallic asteroids compared to asteroids in other belts.
+
+### Orbital Period
+
+1. Amor asteroids usually have the shortest orbit periods, but they are actually the farthest from Earth. In contrast, Apollo asteroids have longer orbit periods but are the closest to us.
+
+2. Looking at the material composition, metallic NEO asteroids, on average, have shorter orbit periods than carbonaceous asteroids. This implies that we can mine metals from asteroids more often due to their more frequent orbits.
+
 # Acknoledgements
 
 1. This project would not exist without Kurzgesagt. Although, the YouTube channel isn't directly involved with this project, it is heavily inspired from their work. Most of the resources used to study about asteroids and feasibility of mining from them was directly sourced from their video's shownotes. 
